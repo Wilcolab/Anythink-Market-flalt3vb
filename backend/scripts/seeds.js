@@ -1,9 +1,9 @@
 //TODO: seeds script should come here, so we'll be able to put some data in our local env
 
 const mongoose = require("mongoose");
-const User = mongoose.model("User");
-const Item = mongoose.model("Item");
-const Comment = mongoose.model("Comment");
+const User = require("../models/User"); // Ensure correct path to models
+const Item = require("../models/Item");
+const Comment = require("../models/Comment");
 
 const connection = process.env.MONGODB_URI;
 mongoose.connect(connection, { useNewUrlParser: true, useUnifiedTopology: true });
@@ -23,10 +23,10 @@ async function seedDatabase() {
         description: `description ${i}`,
         seller: createdUser._id,
       };
-      const createdItem = await Item.findOneAndUpdate(item, {}, options);
+      const createdItem = await Item.findOneAndUpdate({ slug: item.slug }, item, options);
       
       // Add comments to item
-      if (!createdItem.comments || !createdItem.comments.length) {
+      if (!createdItem.comments || createdItem.comments.length === 0) {
         let commentIds = [];
         for (let j = 0; j < 100; j++) {
           const comment = new Comment({
@@ -44,7 +44,7 @@ async function seedDatabase() {
     console.log("Finished DB seeding");
     process.exit(0);
   } catch (err) {
-    console.log(`Error while running DB seed: ${err.message}`);
+    console.error(`Error while running DB seed: ${err.message}`);
     process.exit(1);
   }
 }
